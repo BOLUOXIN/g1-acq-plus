@@ -10,7 +10,7 @@
 
 (function () {
   var VERSION = "g1-acq-v8.0";
-  var SOURCE_PREFIX = "g1.ios.2tb.";
+  var SOURCE_PREFIX = "g1.ios.ai.2tb.";
   var TARGET_OVERRIDE_KEY = "g1.target.override.v1";
 
   // Default target for 2TB / Pro 5TB: newly discovered 18-month $0 free trial (can be switched in Safari at https://one.google.com/g1-sku-report)
