@@ -387,18 +387,25 @@ test("collector bounds stored candidates at 300 and still counts existing IDs", 
   assert.equal(get(result.storage, SCAN_KEY).skus.find(row => row.id === "g1.fixture.0").count, 2);
 });
 
-test("collector skips the local report, other domains and nontext bodies", () => {
+test("collector skips the local report and other domains and counts nontext responses", () => {
   for (const options of [
     { url: REPORT, body: SOURCE },
     { url: REPORT + "?format=json", body: SOURCE },
     { url: REPORT + "/", body: SOURCE },
     { url: REPORT + "/?format=json", body: SOURCE },
-    { url: "https://one.google.com.evil/ai?x=1", body: SOURCE },
-    { body: undefined }, { body: new Uint8Array([1, 2]) }
+    { url: "https://one.google.com.evil/ai?x=1", body: SOURCE }
   ]) {
     const result = run("g1-sku-scan.js", options);
     assert.deepEqual(result.payload, {});
     assert.equal(result.storage.size, 0);
+  }
+  for (const body of [undefined, new Uint8Array([1, 2])]) {
+    const result = run("g1-sku-scan.js", { body });
+    assert.deepEqual(result.payload, {});
+    const scan = get(result.storage, SCAN_KEY);
+    assert.equal(scan.nonTextResponses, 1);
+    assert.equal(scan.recentResponses[0].status, "non-text");
+    assert.deepEqual(scan.skus, []);
   }
 });
 
@@ -413,8 +420,8 @@ test("passive collection identifies complete Pro IDs without rewriting the respo
   const ids = [newSource, SOURCE, "g1.ios.ai.2tb.", "g1.ios.ai.2tbx.fixture", TWENTY];
   const priorMapping = JSON.stringify({ schemaVersion: 1, status: "no-match" });
   const storage = new Map([[TEST_KEY, priorMapping]]);
-  const result = run("g1-acq.js", {
-    url: "https://one.google.com/plans",
+  const result = run("g1-sku-scan.js", {
+    url: "https://one.google.com/ai?fixture=1",
     body: JSON.stringify(ids),
     storage
   });
@@ -423,9 +430,23 @@ test("passive collection identifies complete Pro IDs without rewriting the respo
   assert.deepEqual(ids.map(id => byId.get(id)), [true, true, false, false, false]);
   assert.deepEqual(result.payload, {});
   assert.equal(storage.get(TEST_KEY), priorMapping);
+  assert.equal(scan.recentResponses[0].candidateCount, ids.length);
 
   const report = JSON.parse(run("g1-sku-report.js", { url: REPORT + "?format=json", storage }).payload.response.body);
   assert.deepEqual(report.scan.skus, scan.skus);
+});
+
+test("the fork modules load only the fork's passive collector and local report", () => {
+  const prefix = "https://raw.githubusercontent.com/BOLUOXIN/g1-acq-plus/main/";
+  for (const name of ["g1-acq-v7.sgmodule", "g1-acq-v8.sgmodule"]) {
+    const config = fs.readFileSync(path.join(root, name), "utf8");
+    const hooks = Array.from(config.matchAll(/type=(http-\w+)[^\r\n]*script-path=([^\r\n]+)/g),
+      match => [match[1], match[2]]);
+    assert.deepEqual(hooks, [
+      ["http-response", prefix + "g1-sku-scan.js"],
+      ["http-request", prefix + "g1-sku-report.js"]
+    ]);
+  }
 });
 
 test("report identifies complete Pro IDs from passive scan records", () => {
@@ -447,6 +468,9 @@ test("report identifies complete Pro IDs from passive scan records", () => {
   assert(html.includes("<code>" + newSource + "</code> <span class=badge>2TB / Pro</span>"));
   assert.equal(report.test.sourcePrefix, "g1.ios.ai.2tb.");
   assert.equal(storage.get(SCAN_KEY), before);
+  const attemptedChange = run("g1-sku-report.js", { url: REPORT + "?set_target=g1.fixture.target", storage });
+  assert.deepEqual(attemptedChange.writes, []);
+  assert(!attemptedChange.payload.response.body.includes("?set_target="));
 });
 
 test("report displays captured IDs and test sources without external assets", () => {

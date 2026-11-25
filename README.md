@@ -1,4 +1,7 @@
-# G1 ACQ Plus (`v8.0.0`) — Google One (iOS / Android) 隐藏免费试用与折扣 SKU 模块
+# G1 ACQ Plus — Google One SKU 被动识别
+
+本分叉的 v7 和 v8 模块记录 Google One 响应中出现的完整 SKU，并原样放行响应。本机报告会将新旧 2TB / Pro SKU 标记为 **2TB / Pro**。文中的 v8.0.0 功能及价格表属于上游历史资料。
+
 
 > **开源出处与致谢（Attribution & Credits）**
 > - 本项目基于开源项目 [**`crhywun/g1-acq`**](https://github.com/crhywun/g1-acq)（作者：[@crhywun](https://github.com/crhywun)）扩展构建，保留其核心 Shadowrocket `one.google.com` 响应改写、被动 SKU 采集与本机诊断报告架构。
@@ -7,7 +10,7 @@
 
 ---
 
-## 一、核心升级亮点（`v8.0.0` vs 原版 `v7.6.0`）
+## 一、上游历史功能（`v8.0.0`）
 
 1. **新增 Pro 5TB 单次直开 18 个月 / 15 个月 / 12 个月 \$0 免费试用 SKU**：
    - 原版默认将 `g1.ios.2tb.*` 改写为付费的 `g1.2tb.ai.12months_ip_90p`（\$1.99/月 × 12个月）。
@@ -22,26 +25,21 @@
 
 ---
 
-## 二、Shadowrocket（小火箭）模块安装地址
+## 二、Shadowrocket 被动识别模块
 
-在 Shadowrocket「模块（Modules）」中点击右上角添加以下地址：
+在 Shadowrocket 的「模块」中添加并启用以下地址。已使用同一地址的用户可刷新模块。
 
 ```text
-https://raw.githubusercontent.com/Dgkncn/g1-acq-plus/main/g1-acq-v8.sgmodule
+https://raw.githubusercontent.com/BOLUOXIN/g1-acq-plus/main/g1-acq-v8.sgmodule
 ```
-*(兼容旧文件名地址：`https://raw.githubusercontent.com/Dgkncn/g1-acq-plus/main/g1-acq-v7.sgmodule`)*
 
-### 安装与使用步骤
-1. 在小火箭「模块」中添加并勾选启用上方模块。
-2. 进入小火箭 **配置 → 当前配置右侧 `(i)` → HTTPS 解密**，开启 HTTPS 解密并安装、信任 Shadowrocket 根证书（确保 `one.google.com` 在解密域名列表中）。
-3. 打开 **Safari** 访问本机控制台：[https://one.google.com/g1-sku-report](https://one.google.com/g1-sku-report)
-   - 页面顶部显示 **`本机脚本已接管 · v8.0.0`** 即表示模块生效。
-   - 在 **「一键切换 2TB / Pro 5TB 隐藏目标 SKU」** 面板中选择你想要测试的目标 SKU（默认为 `g1.2tb.ai.18months_eft`）。
-4. 打开 iOS **Google App（彩色 G 图标）→ 点击右上角头像 → Google One 管理**，进入 **2TB / Pro** 或 **20TB / 30TB Ultra** 方案页，拉起 App Store 收银台核对显示的价格与免费试用周期。
+旧文件名 `g1-acq-v7.sgmodule` 提供相同的被动功能。当前配置需能读取 `one.google.com` 的 HTTPS 响应。
+
+打开 Google One 方案页后，在同一台手机的 Safari 中查看[本机 SKU 报告](https://one.google.com/g1-sku-report)。页面顶部显示 `本机脚本已接管 · v8.0.1`；刷新报告即可查看采集活动、2TB / Pro SKU 标记，或导出 JSON。
 
 ---
 
-## 三、全量扫描挖掘出的核心隐藏 SKU 一览表
+## 三、上游历史 SKU 目录
 
 ### 1. Google AI Pro (5 TB) — \$0 免费试用与特价折扣系列
 
